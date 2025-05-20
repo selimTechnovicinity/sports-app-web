@@ -56,7 +56,7 @@ const AppFooter = () => {
           </div>
 
           {/* Phone Image */}
-          <div className="w-full flex justify-center absolute top-0 left-30 md:absolute-none">
+          <div className="w-full flex justify-center  left-30 md:absolute-none relative">
             <Image
               src={assets.images.phone}
               alt="Phone Preview"
