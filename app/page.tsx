@@ -1,11 +1,11 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import AppFooter from "@/components/landing-page/Footer";
 
 export default function Home() {
-  const router = useRouter();
-  useEffect(() => {
-    router.push("/dashboard");
-  }, [router]);
-  return <div></div>;
+  return (
+    <div>
+      <AppFooter />
+    </div>
+  );
 }
