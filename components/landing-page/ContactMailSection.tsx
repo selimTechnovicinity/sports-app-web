@@ -17,7 +17,7 @@ const ContactMailSection = () => {
   };
 
   return (
-    <section className="max-w-3xl mx-auto px-4 py-16 text-center">
+    <section className="max-w-7xl mx-auto px-4 py-16 text-center">
       <h2 className="text-2xl md:text-3xl font-bold text-[#1C1C29] mb-2">
         Send Us A Mail
       </h2>
@@ -27,7 +27,7 @@ const ContactMailSection = () => {
       </p>
 
       <CustomForm onSubmit={handleSend} defaultValues={{ message: "" }}>
-        <div className="bg-[#F2FDF9] rounded-xl p-2 flex items-center gap-2 max-w-xl mx-auto">
+        <div className="bg-[#F2FDF9] rounded-xl p-2 flex items-center gap-2 max-w-3xl mx-auto">
           <CustomInput
             name="message"
             placeholder="Write your message"
