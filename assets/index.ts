@@ -8,6 +8,21 @@ import not_found from "./pic/not-found.png";
 import playstore_small from "./pic/paly_store_small.png";
 import phone from "./pic/phone.png";
 import playstore_badge from "./pic/playstore-badge.png";
+import section1_basket_left from "./pic/section1_basket_left.png";
+import section1_basket_right from "./pic/section1_basket_right.png";
+import section1_phone_left from "./pic/section1_phone_left.png";
+import section1_phone_right from "./pic/section1_phone_right.png";
+import section1_phone_center from "./pic/section1_phone_center.png";
+import section2_1 from "./pic/section2_1.png";
+import section2_2 from "./pic/section2_2.png";
+import section2_3 from "./pic/section2_3.png";
+import section2_4 from "./pic/section2_4.png";
+import section2_5 from "./pic/section2_5.png";
+import section2_6 from "./pic//section2_6.png";
+import tool_feature_phone from "./pic/tool_feature_phone.png";
+import tool_feature_1 from "./pic/tool_feature_1.png";
+import tool_feature_2 from "./pic/tool_feature_2.png";
+import tool_feature_3 from "./pic/tool_feature_3.png";
 
 const assets = {
   images: {
@@ -21,7 +36,24 @@ const assets = {
     playstore_badge,
     apple_small,
     playstore_small,
+    section1_basket_left,
+    section1_basket_right,
+    section1_phone_left,
+    section1_phone_center,
+    section1_phone_right,
+    tool_feature_phone,
+    tool_feature_1,
+    tool_feature_2,
+    tool_feature_3,
   },
+  section2: [
+    section2_1,
+    section2_2,
+    section2_3,
+    section2_4,
+    section2_5,
+    section2_6,
+  ],
 };
 
 export default assets;
