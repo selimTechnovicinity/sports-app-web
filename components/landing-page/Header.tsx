@@ -5,8 +5,8 @@ import Link from "next/link";
 
 const AppHeader = () => {
   return (
-    <header className="w-full bg-white">
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+    <header className="w-full bg-white px-6">
+      <div className="max-w-7xl lg:mx-auto  py-3 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image

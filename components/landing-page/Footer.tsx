@@ -53,17 +53,16 @@ const AppFooter = () => {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Phone Image */}
-          <div className="w-full flex justify-center  left-30 md:absolute-none relative">
-            <Image
-              src={assets.images.phone}
-              alt="Phone Preview"
-              width={250}
-              height={500}
-              className="object-contain"
-            />
+            {/* Phone Image */}
+            <div className=" flex absolute justify-center right-150">
+              <Image
+                src={assets.images.phone}
+                alt="Phone Preview"
+                width={250}
+                height={500}
+                className="object-contain"
+              />
+            </div>
           </div>
         </div>
       </div>
