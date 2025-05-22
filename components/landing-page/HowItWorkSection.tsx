@@ -3,7 +3,7 @@ import { FaDownload, FaUsers, FaShareAlt } from "react-icons/fa";
 
 const HowItWorksSection = () => {
   return (
-    <section className="bg-[#0F172A] text-white py-16">
+    <section className="bg-[#0F172A] text-white py-16 mx-auto px-4">
       <div className="max-w-7xl mx-auto text-center">
         {/* Title */}
         <p className="text-sm text-gray-300">How It Works Section</p>

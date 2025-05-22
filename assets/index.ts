@@ -23,6 +23,12 @@ import tool_feature_phone from "./pic/tool_feature_phone.png";
 import tool_feature_1 from "./pic/tool_feature_1.png";
 import tool_feature_2 from "./pic/tool_feature_2.png";
 import tool_feature_3 from "./pic/tool_feature_3.png";
+import coach_focus_1 from "./pic/coach_focus_1.png";
+import coach_focus_2 from "./pic/coach_focus_2.png";
+import coach_focus_3 from "./pic/coach_focus_3.png";
+import live1 from "./pic/live1.png";
+import live2 from "./pic/live2.png";
+import never_miss from "./pic/never_miss.png";
 
 const assets = {
   images: {
@@ -45,6 +51,12 @@ const assets = {
     tool_feature_1,
     tool_feature_2,
     tool_feature_3,
+    coach_focus_1,
+    coach_focus_2,
+    coach_focus_3,
+    live1,
+    live2,
+    never_miss,
   },
   section2: [
     section2_1,
