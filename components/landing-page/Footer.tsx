@@ -8,7 +8,7 @@ const AppFooter = () => {
       {/* Download Section */}
       <div className="bg-white">
         <div className="bg-[#181F32]">
-          <div className=" text-white py-6  px-6 flex flex-col lg:flex-row items-center justify-between gap-8 mt-10 max-w-7xl mx-auto">
+          <div className=" text-white py-6  px-6 flex flex-col lg:flex-row items-center justify-between gap-8 mt-10 max-w-7xl mx-auto justify-between relative">
             {/* Text & Buttons */}
             <div className="flex flex-col gap-4 max-w-lg">
               <h2 className="text-3xl lg:text-4xl font-semibold leading-snug">
@@ -54,7 +54,7 @@ const AppFooter = () => {
               </div>
             </div>
             {/* Phone Image */}
-            <div className=" flex absolute justify-center right-150">
+            <div className="hidden md:flex absolute justify-end right-0 top-[-50px]">
               <Image
                 src={assets.images.phone}
                 alt="Phone Preview"

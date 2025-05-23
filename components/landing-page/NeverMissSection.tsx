@@ -18,7 +18,7 @@ const NeverMissSection = () => {
   }, [inView, controls]);
 
   return (
-    <section className="  px-4 py-60 ">
+    <section className="  px-4 lg:py-60 sm:py-20">
       <div className="bg-[#00D084] rounded-[32px] max-w-7xl mx-auto text-center text-white py-4">
         <p className="text-sm mb-2">Live score and Video</p>
         <h2 className="text-3xl md:text-5xl font-extrabold mb-4">

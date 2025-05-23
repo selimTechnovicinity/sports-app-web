@@ -5,7 +5,7 @@ import assets from "@/assets";
 
 const ToolFeatureSection = () => {
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-20 px-6 bg-white sm:bg-[#F9F9F9]">
       <div className=" max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12">
         {/* Text Section */}
         <motion.div
@@ -13,7 +13,7 @@ const ToolFeatureSection = () => {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="w-[40%] text-center lg:text-left"
+          className="lg:w-[40%] sm:w-full text-center lg:text-left"
         >
           <p className="text-sm text-gray-500 mb-2">
             All-in-One Team Management
@@ -41,14 +41,14 @@ const ToolFeatureSection = () => {
           viewport={{ once: true }}
           className="flex-1 relative h-[680px] max-w-[752px] w-full"
         >
-          <div className="bg-[#00D084] h-full rounded-[22px] max-w-7xl">
+          <div className="lg:bg-[#00D084] md:bg-white h-full rounded-[22px] max-w-7xl">
             {/* Background Shape */}
             <Image
               src={assets.images.tool_feature_phone}
               alt="Phone Background"
               width={405}
               height={680}
-              className="absolute inset-0 object-contain h-full z-0 ml-70 shadow-xl transition-transform duration-500 hover:scale-105"
+              className="relative sm:absolute lg:ml-70 object-contain h-full z-0 shadow-xl transition-transform duration-500 hover:scale-105"
             />
 
             {/* Main App UI */}
@@ -57,7 +57,7 @@ const ToolFeatureSection = () => {
               alt="Main App"
               width={310}
               height={600}
-              className="absolute top-[60px] left-10 z-20 rounded-[28px] shadow-xl transition-transform duration-500 hover:scale-105"
+              className="relative sm:absolute top-[60px] lg:left-10 z-20 rounded-[28px] shadow-xl transition-transform duration-500 hover:scale-105"
             />
 
             {/* RSVP Floating */}
@@ -66,7 +66,7 @@ const ToolFeatureSection = () => {
               alt="RSVP"
               width={350}
               height={600}
-              className="absolute top-[240px] left-[-140px] z-30 rounded-xl transition-transform duration-500 hover:scale-105"
+              className="relative sm:absolute top-[240px] sm:left-0 lg:left-[-140px] z-30 rounded-xl transition-transform duration-500 hover:scale-105"
             />
 
             {/* Chat Floating */}
@@ -75,7 +75,7 @@ const ToolFeatureSection = () => {
               alt="Chats"
               width={260}
               height={160}
-              className="absolute bottom-4 left-[-50px] z-30 rounded-xl transition-transform duration-500 hover:scale-105"
+              className="relative sm:absolute bottom-4 lg:left-[-50px] sm:left-0 z-30 rounded-xl transition-transform duration-500 hover:scale-105"
             />
           </div>
         </motion.div>
