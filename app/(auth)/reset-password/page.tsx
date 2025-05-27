@@ -1,12 +1,15 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import assets from "@/assets";
 import CustomButton from "@/components/button/CustomButton";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
+import { setPasswordMutationFn } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -28,10 +31,27 @@ const ResetPasswordPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const { mutate: resetPassword, isPending } = useMutation({
+    mutationFn: setPasswordMutationFn,
+    onSuccess: (response) => {
+      setError(null);
+      console.log(response.data);
+      router.push("/login");
+    },
+    onError: (error: any) => {
+      setError(error?.response?.data?.message || "An error occurred");
+    },
+  });
+
   const handleReset = (values: FieldValues) => {
-    console.log("New password:", values.password);
-    // Replace with actual password reset logic
-    router.push("/login");
+    const email = localStorage.getItem("email");
+    const otp = localStorage.getItem("otp");
+    resetPassword({
+      email: email,
+      otp: otp,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
+    });
   };
 
   return (

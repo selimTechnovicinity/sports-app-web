@@ -1,8 +1,11 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import assets from "@/assets";
 import CustomButton from "@/components/button/CustomButton";
 import BusketBall from "@/components/shared/BusketBall";
+import { verifyOTPMutationFn } from "@/lib/api";
 import { Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,10 +28,25 @@ const EnterOtpPage = () => {
     }
   };
 
+  const { mutate: verifyOTP, isPending } = useMutation({
+    mutationFn: verifyOTPMutationFn,
+    onSuccess: (response, variables) => {
+      localStorage.setItem("otp", variables.otp);
+      router.push("/reset-password");
+    },
+    onError: (error) => {
+      console.error("Error verifying OTP:", error);
+      alert("Failed to verify OTP. Please try again.");
+    },
+  });
+
   const handleSubmit = () => {
     const finalOtp = otp.join("");
+    const email = localStorage.getItem("email");
+
+    if (!email) throw new Error("Please go back to login page and try again.");
     console.log("Entered OTP:", finalOtp);
-    router.push("/reset-password");
+    verifyOTP({ email: email, otp: finalOtp });
   };
 
   return (

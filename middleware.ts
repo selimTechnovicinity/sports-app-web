@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutes = ["/ff"];
+const protectedRoutes = ["/dashboard"];
 const publicRoutes = [
   "/",
   "/register",

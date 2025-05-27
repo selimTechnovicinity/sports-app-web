@@ -5,8 +5,11 @@ import CustomButton from "@/components/button/CustomButton";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
+import { forgotPasswordMutationFn } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,10 +25,23 @@ const ForgetPasswordPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const { mutate: forgotPassword, isPending } = useMutation({
+    mutationFn: forgotPasswordMutationFn,
+    onSuccess: (response, variables) => {
+      console.log("Forgot password response", response.data);
+      localStorage.setItem("email", variables.email);
+      router.push("/enter-otp");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "An error occurred during password reset.";
+      setError(errorMessage);
+    },
+  });
+
   const handleForgot = (values: FieldValues) => {
-    console.log("Forgot values", values);
-    // Call your forgot password API here
-    router.push("/verify-code");
+    forgotPassword(values);
   };
 
   return (
