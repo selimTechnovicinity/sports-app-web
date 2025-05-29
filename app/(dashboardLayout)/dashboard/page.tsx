@@ -37,6 +37,7 @@ const DashboardPage = () => {
     queryKey: ["userProfile"],
     queryFn: async () => {
       const response = await getUserProfileQueryFn();
+      console.log(response.data);
       return response.data;
     },
   });
@@ -124,7 +125,7 @@ const DashboardPage = () => {
               >
                 <img
                   src={team.image}
-                  alt={team.team_name}
+                  alt={""}
                   className="w-6 h-6 rounded-full object-cover"
                 />
                 {team.team_name}
@@ -300,7 +301,7 @@ const DashboardPage = () => {
                     <div className="text-center">
                       <img
                         src={event.team_id?.image || "/default-team.png"}
-                        alt={event.team_id?.team_name || "Your Team"}
+                        alt={" "}
                         className="w-10 h-10 rounded-full mx-auto mb-2"
                       />
                       <p className="text-xs mt-2">

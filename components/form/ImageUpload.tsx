@@ -1,5 +1,5 @@
-"use client";
 /* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -13,20 +13,20 @@ import {
 import { useCallback, useState } from "react";
 
 interface ImageUploadProps {
-  onUploadComplete: (url: string) => void;
-  initialImage?: string;
+  onUploadComplete: (file: File | null) => void;
+  initialImageUrl?: File | null; // For displaying existing images only
 }
 
 const ImageUpload = ({
   onUploadComplete,
-  initialImage = "",
+  initialImageUrl = null,
 }: ImageUploadProps) => {
-  const [image, setImage] = useState<string>(initialImage);
+  const [previewUrl, setPreviewUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
   const handleImageChange = useCallback(
-    async (event: React.ChangeEvent<HTMLInputElement>) => {
+    (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       if (!file) return;
 
@@ -45,18 +45,15 @@ const ImageUpload = ({
       setError("");
 
       try {
-        // In a real app, you would upload the file to your server or cloud storage here
-        // This is a mock implementation that just creates a local object URL
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageUrl = e.target?.result as string;
-          setImage(imageUrl);
-          onUploadComplete(imageUrl);
-          setIsUploading(false);
-        };
-        reader.readAsDataURL(file);
+        // Create temporary URL for preview only
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+
+        // Pass the original file to parent component
+        onUploadComplete(file);
       } catch (err) {
-        setError("Failed to upload image. Please try again.");
+        setError("Failed to process image");
+      } finally {
         setIsUploading(false);
       }
     },
@@ -64,10 +61,14 @@ const ImageUpload = ({
   );
 
   const handleRemoveImage = useCallback(() => {
-    setImage("");
-    onUploadComplete("");
+    // Clean up the object URL to prevent memory leaks
+    if (previewUrl && previewUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl("");
+    onUploadComplete(null); // Pass null or undefined as needed
     setError("");
-  }, [onUploadComplete]);
+  }, [onUploadComplete, previewUrl]);
 
   return (
     <Box
@@ -79,11 +80,11 @@ const ImageUpload = ({
         width: "100%",
       }}
     >
-      {image ? (
+      {previewUrl ? (
         <Box sx={{ position: "relative" }}>
           <Avatar
-            src={image}
-            alt="Uploaded preview"
+            src={previewUrl}
+            alt="Preview"
             sx={{
               width: 150,
               height: 150,
@@ -145,7 +146,7 @@ const ImageUpload = ({
                   Uploading...
                 </>
               ) : (
-                "Upload Team Logo"
+                "Upload Image"
               )}
             </Button>
           </label>

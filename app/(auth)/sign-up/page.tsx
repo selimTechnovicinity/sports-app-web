@@ -5,8 +5,11 @@ import CustomButton from "@/components/button/CustomButton";
 import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
+import { registerMutationFn } from "@/lib/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
+import { useMutation } from "@tanstack/react-query";
+import { AxiosError } from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,8 +19,8 @@ import { z } from "zod";
 
 const RegisterValidationSchema = z.object({
   email: z.string().min(1, "email is required"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  first_name: z.string().min(1, "First name is required"),
+  last_name: z.string().min(1, "Last name is required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
@@ -25,10 +28,23 @@ const CreateAccountPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const { mutate: register, isPending } = useMutation({
+    mutationFn: registerMutationFn,
+    onSuccess: (response) => {
+      console.log(response);
+      router.push("/login");
+    },
+    onError: (error: AxiosError<{ message?: string }>) => {
+      const errorMessage =
+        error?.response?.data?.message ||
+        "An error occurred during registration.";
+      setError(errorMessage);
+    },
+  });
+
   const handleRegister = (values: FieldValues) => {
     console.log("Register values", values);
-    // Call your registration API/mutation here
-    router.push("/dashboard");
+    register(values);
   };
 
   return (
@@ -67,20 +83,20 @@ const CreateAccountPage = () => {
             resolver={zodResolver(RegisterValidationSchema)}
             defaultValues={{
               email: "",
-              firstName: "",
-              lastName: "",
+              first_name: "",
+              last_name: "",
               password: "",
             }}
           >
             <div className="space-y-4">
               <CustomInput
-                name="firstName"
+                name="first_name"
                 placeholder="First Name"
                 fullWidth
                 sx={{ mb: 2 }}
               />
               <CustomInput
-                name="lastName"
+                name="last_name"
                 placeholder="Last Name"
                 fullWidth
                 sx={{ mb: 2 }}
@@ -109,6 +125,13 @@ const CreateAccountPage = () => {
             <CustomButton type="submit" fullWidth sx={{ mt: 2, mb: 4 }}>
               Next
             </CustomButton>
+            <div className="text-center text-sm mb-4">
+              <span>Already have an account?</span>
+              <Link href="/login" className="text-green-500 font-medium">
+                {" "}
+                Login
+              </Link>
+            </div>
 
             <Typography
               variant="caption"

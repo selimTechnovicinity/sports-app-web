@@ -29,6 +29,7 @@ import coach_focus_3 from "./pic/coach_focus_3.png";
 import live1 from "./pic/live1.png";
 import live2 from "./pic/live2.png";
 import never_miss from "./pic/never_miss.png";
+import no_image from "./pic/no_image.jpg";
 
 const assets = {
   images: {
@@ -57,6 +58,7 @@ const assets = {
     live1,
     live2,
     never_miss,
+    no_image,
   },
   section2: [
     section2_1,

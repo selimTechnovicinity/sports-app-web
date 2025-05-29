@@ -115,8 +115,16 @@ const LoginPage = () => {
             )}
 
             <CustomButton type="submit" fullWidth sx={{ mb: 4 }}>
-              Next
+              Login
             </CustomButton>
+
+            <div className="text-center text-sm mb-4">
+              <span>Don&apos;t have an account?</span>
+              <Link href="/sign-up" className="text-green-500 font-medium">
+                {" "}
+                Sign Up
+              </Link>
+            </div>
 
             <Typography
               variant="caption"
