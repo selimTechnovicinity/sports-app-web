@@ -71,7 +71,7 @@ const DashboardPage = () => {
       const startTime = new Date(event.start_date);
       const endTime = new Date(startTime.getTime() + event.duration * 60000);
 
-      if (currentTime >= startTime) {
+      if (currentTime >= startTime && currentTime <= endTime) {
         acc.liveEvents.push(event);
       } else if (currentTime < startTime) {
         acc.upcomingEvents.push(event);

@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import API from "@/lib/axios-client";
+import { autocomplete } from "@/lib/google";
+import { PlaceAutocompleteResult } from "@googlemaps/google-maps-services-js";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -190,8 +192,22 @@ const TeamCreationModal = ({
     team_place: null,
     image: "",
   });
-  const [locationOptions, setLocationOptions] = useState<OptionType[]>([]);
-  const [locationSearch, setLocationSearch] = useState("");
+  // const [locationOptions, setLocationOptions] = useState<OptionType[]>([]);
+  // const [locationSearch, setLocationSearch] = useState("");
+  const [predictions, setPredictions] = useState<PlaceAutocompleteResult[]>([]);
+  const [input, setInput] = useState("");
+
+  // location
+
+  useEffect(() => {
+    console.log("input: ", input);
+    const fetchPredictions = async () => {
+      const predictions = await autocomplete(input);
+      console.log("predictions", predictions);
+      setPredictions(predictions ?? []);
+    };
+    fetchPredictions();
+  }, [input]);
 
   // Fetch game types
   const { data: gameTypes } = useQuery({
@@ -242,18 +258,6 @@ const TeamCreationModal = ({
     },
   });
 
-  // Location search handler
-  useEffect(() => {
-    if (locationSearch.length > 2) {
-      const mockResults = [
-        { value: "new-york", label: "New York, NY, USA" },
-        { value: "los-angeles", label: "Los Angeles, CA, USA" },
-        { value: locationSearch, label: locationSearch },
-      ];
-      setLocationOptions(mockResults);
-    }
-  }, [locationSearch]);
-
   const steps = [
     {
       title: "Select Your Team's Sports",
@@ -292,9 +296,9 @@ const TeamCreationModal = ({
       title: "Where is your team based?",
       select: true,
       placeholder: "Search city or town",
-      options: locationOptions,
+      options: predictions || [],
       name: "team_place",
-      onInputChange: (inputValue: string) => setLocationSearch(inputValue),
+      onInputChange: (inputValue: string) => setInput(inputValue),
     },
   ];
 
@@ -380,6 +384,12 @@ const TeamCreationModal = ({
                   borderColor: "#d1d5db",
                 }),
               }}
+              isLoading={predictions.length > 2 && predictions.length === 0}
+              noOptionsMessage={() =>
+                predictions.length < 3
+                  ? "Type at least 3 characters to search"
+                  : "No locations found"
+              }
             />
           ) : step.imageUpload ? (
             <ImageUpload
