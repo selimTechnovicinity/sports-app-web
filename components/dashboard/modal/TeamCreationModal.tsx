@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CustomButton from "@/components/button/CustomButton";
+import ImageUpload from "@/components/form/ImageUpload";
 import {
   Dialog,
   DialogContent,
@@ -9,23 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { createTeamMutationFn } from "@/lib/api";
 import API from "@/lib/axios-client";
-import { autocomplete } from "@/lib/google";
-import { PlaceAutocompleteResult } from "@googlemaps/google-maps-services-js";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import DeleteIcon from "@mui/icons-material/Delete";
-import {
-  Avatar,
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  Input,
-  Typography,
-} from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import Select from "react-select";
+
+import { Input } from "@mui/material";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface OptionType {
   value: string;
@@ -39,141 +29,9 @@ interface FormData {
   age_type: string;
   season_type: string;
   team_name: string;
-  team_place: OptionType | null;
-  image: string;
+  team_place: string;
+  image: File | null;
 }
-
-const ImageUpload = ({
-  onUploadComplete,
-  initialImage = "",
-}: {
-  onUploadComplete: (url: string) => void;
-  initialImage?: string;
-}) => {
-  const [image, setImage] = useState<string>(initialImage);
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleImageChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (!file.type.match("image.*")) {
-      setError("Please select an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File size should be less than 5MB");
-      return;
-    }
-
-    setIsUploading(true);
-    setError("");
-
-    try {
-      // Mock upload - replace with actual API call in production
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageUrl = e.target?.result as string;
-        setImage(imageUrl);
-        onUploadComplete(imageUrl);
-        setIsUploading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      setError("Failed to upload image. Please try again.");
-      setIsUploading(false);
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setImage("");
-    onUploadComplete("");
-    setError("");
-  };
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 2,
-      }}
-    >
-      {image ? (
-        <Box sx={{ position: "relative" }}>
-          <Avatar
-            src={image}
-            alt="Team logo"
-            sx={{ width: 150, height: 150, borderRadius: "8px" }}
-            variant="rounded"
-          />
-          <IconButton
-            onClick={handleRemoveImage}
-            sx={{
-              position: "absolute",
-              top: -10,
-              right: -10,
-              backgroundColor: "error.main",
-              color: "white",
-            }}
-          >
-            <DeleteIcon />
-          </IconButton>
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            border: "2px dashed",
-            borderColor: "divider",
-            borderRadius: "8px",
-            p: 4,
-            width: "100%",
-            textAlign: "center",
-          }}
-        >
-          <input
-            accept="image/*"
-            style={{ display: "none" }}
-            id="image-upload-input"
-            type="file"
-            onChange={handleImageChange}
-            disabled={isUploading}
-          />
-          <label htmlFor="image-upload-input">
-            <Button
-              component="span"
-              variant="outlined"
-              startIcon={<CloudUploadIcon />}
-              disabled={isUploading}
-            >
-              {isUploading ? (
-                <>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  Uploading...
-                </>
-              ) : (
-                "Upload Team Logo"
-              )}
-            </Button>
-          </label>
-          <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-            PNG, JPG up to 5MB
-          </Typography>
-        </Box>
-      )}
-      {error && (
-        <Typography color="error" variant="caption">
-          {error}
-        </Typography>
-      )}
-    </Box>
-  );
-};
 
 const TeamCreationModal = ({
   open,
@@ -189,25 +47,27 @@ const TeamCreationModal = ({
     age_type: "",
     season_type: "",
     team_name: "",
-    team_place: null,
-    image: "",
+    team_place: "",
+    image: null,
   });
   // const [locationOptions, setLocationOptions] = useState<OptionType[]>([]);
   // const [locationSearch, setLocationSearch] = useState("");
-  const [predictions, setPredictions] = useState<PlaceAutocompleteResult[]>([]);
-  const [input, setInput] = useState("");
+  // const [predictions, setPredictions] = useState<PlaceAutocompleteResult[]>([]);
+  // const [input, setInput] = useState("");
 
-  // location
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    console.log("input: ", input);
-    const fetchPredictions = async () => {
-      const predictions = await autocomplete(input);
-      console.log("predictions", predictions);
-      setPredictions(predictions ?? []);
-    };
-    fetchPredictions();
-  }, [input]);
+  const { mutate: createTeam, isPending } = useMutation({
+    mutationFn: createTeamMutationFn,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      console.log("Team created successfully:", data);
+      onClose();
+    },
+    onError: (error: any) => {
+      console.error("Error creating team:", error);
+    },
+  });
 
   // Fetch game types
   const { data: gameTypes } = useQuery({
@@ -281,6 +141,7 @@ const TeamCreationModal = ({
       imageUpload: true,
       name: "image",
     },
+
     {
       title: "What is your team's name?",
       input: true,
@@ -288,18 +149,24 @@ const TeamCreationModal = ({
       name: "team_name",
     },
     {
+      title: "Where is your team based?",
+      input: true,
+      placeholder: "Input city or town",
+      name: "team_place",
+    },
+    {
       title: "When is the upcoming season?",
       options: seasonTypes || [],
       name: "season_type",
     },
-    {
-      title: "Where is your team based?",
-      select: true,
-      placeholder: "Search city or town",
-      options: predictions || [],
-      name: "team_place",
-      onInputChange: (inputValue: string) => setInput(inputValue),
-    },
+    // {
+    //   title: "Where is your team based?",
+    //   select: true,
+    //   placeholder: "Search city or town",
+    //   options: predictions || [],
+    //   name: "team_place",
+    //   onInputChange: (inputValue: string) => setInput(inputValue),
+    // },
   ];
 
   const step = steps[stepIndex];
@@ -320,30 +187,26 @@ const TeamCreationModal = ({
     }));
   };
 
-  const handleLocationSelect = (option: OptionType | null) => {
+  const handleImageUpload = (file: File | null) => {
     setFormData((prev) => ({
       ...prev,
-      team_place: option,
-    }));
-  };
-
-  const handleImageUpload = (url: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      image: url,
+      image: file,
     }));
   };
 
   const handleSubmit = () => {
-    console.log("Form submitted:", {
+    const data = {
       game_type: formData.game_type,
       team_type: formData.team_type,
       age_type: formData.age_type,
       season_type: formData.season_type,
       team_name: formData.team_name,
-      team_place: formData.team_place?.label || "",
+      team_place: formData.team_place || "",
       image: formData.image,
-    });
+    };
+
+    createTeam(data);
+
     onClose();
   };
 
@@ -365,36 +228,10 @@ const TeamCreationModal = ({
               onChange={handleInputChange}
               fullWidth
             />
-          ) : step.select ? (
-            <Select
-              options={step.options}
-              value={formData.team_place}
-              onChange={handleLocationSelect}
-              onInputChange={step.onInputChange}
-              placeholder={step.placeholder}
-              className="react-select-container"
-              classNamePrefix="react-select"
-              menuPortalTarget={document.body}
-              styles={{
-                menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                control: (provided) => ({
-                  ...provided,
-                  padding: "0.5rem",
-                  borderRadius: "0.5rem",
-                  borderColor: "#d1d5db",
-                }),
-              }}
-              isLoading={predictions.length > 2 && predictions.length === 0}
-              noOptionsMessage={() =>
-                predictions.length < 3
-                  ? "Type at least 3 characters to search"
-                  : "No locations found"
-              }
-            />
           ) : step.imageUpload ? (
             <ImageUpload
               onUploadComplete={handleImageUpload}
-              initialImage={formData.image}
+              initialImageUrl={formData.image}
             />
           ) : (
             <div className="grid grid-cols-2 gap-4">
@@ -440,13 +277,8 @@ const TeamCreationModal = ({
               }
             }}
             disabled={
-              (step.input && !formData.team_name) ||
-              (step.select && !formData.team_place) ||
-              (step.imageUpload && !formData.image) ||
-              (!step.input &&
-                !step.select &&
-                !step.imageUpload &&
-                !formData[step.name as keyof FormData])
+              (step.input && !formData[step.name as keyof FormData]) ||
+              (step.imageUpload && !formData.image)
             }
           >
             {isLast ? "Create Team" : "Continue"}

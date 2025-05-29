@@ -23,3 +23,10 @@ export const getUserProfileQueryFn = async () => await API.get(`/users`);
 export const getEnventQueryFn = async () => await API.get(`/events`);
 
 export const getTeamQueryFn = async () => await API.get(`/teams`);
+
+export const createTeamMutationFn = async (data: FieldValues) =>
+  await API.post(`/teams`, data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
