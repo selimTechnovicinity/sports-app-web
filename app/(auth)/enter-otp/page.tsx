@@ -4,6 +4,7 @@ import assets from "@/assets";
 import CustomButton from "@/components/button/CustomButton";
 import BusketBall from "@/components/shared/BusketBall";
 import { verifyOTPMutationFn } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
@@ -14,6 +15,8 @@ import { useState } from "react";
 const EnterOtpPage = () => {
   const router = useRouter();
   const [otp, setOtp] = useState(Array(6).fill(""));
+
+  const { showToast } = useToast();
 
   const handleChange = (index: number, value: string) => {
     if (!/^[0-9]?$/.test(value)) return;
@@ -32,11 +35,12 @@ const EnterOtpPage = () => {
     mutationFn: verifyOTPMutationFn,
     onSuccess: (response, variables) => {
       localStorage.setItem("otp", variables.otp);
+      showToast("OTP verified successfully", "success", "Success");
       router.push("/reset-password");
     },
     onError: (error) => {
       console.error("Error verifying OTP:", error);
-      alert("Failed to verify OTP. Please try again.");
+      showToast("Failed to verify OTP. Please try again.", "error", "Error");
     },
   });
 

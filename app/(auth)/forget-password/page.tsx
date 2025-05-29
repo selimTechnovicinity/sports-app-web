@@ -6,6 +6,7 @@ import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
 import { forgotPasswordMutationFn } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
@@ -24,12 +25,12 @@ const ForgotPasswordValidationSchema = z.object({
 const ForgetPasswordPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-
+  const { showToast } = useToast();
   const { mutate: forgotPassword, isPending } = useMutation({
     mutationFn: forgotPasswordMutationFn,
     onSuccess: (response, variables) => {
-      console.log("Forgot password response", response.data);
       localStorage.setItem("email", variables.email);
+      showToast("Password reset email sent", "success", "Success");
       router.push("/enter-otp");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
@@ -37,6 +38,7 @@ const ForgetPasswordPage = () => {
         error?.response?.data?.message ||
         "An error occurred during password reset.";
       setError(errorMessage);
+      showToast(errorMessage, "error", "Error");
     },
   });
 
