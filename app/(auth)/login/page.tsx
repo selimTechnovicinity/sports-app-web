@@ -6,6 +6,7 @@ import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
 import { loginMutationFn } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
@@ -27,18 +28,21 @@ const LoginPage = () => {
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
+  const { showToast } = useToast();
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginMutationFn,
     onSuccess: (response) => {
       Cookies.set("accessToken", response?.data?.data.accessToken);
       Cookies.set("refreshToken", response?.data?.data?.refreshToken);
+      showToast("Login successful", "success", "Success");
       router.push("/dashboard");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       const errorMessage =
         error?.response?.data?.message || "An error occurred during login.";
       setError(errorMessage);
+      showToast(errorMessage, "error", "Error");
     },
   });
 
@@ -99,6 +103,12 @@ const LoginPage = () => {
               />
             </div>
 
+            {error && (
+              <Typography variant="body2" color="error" mb={2}>
+                {error}
+              </Typography>
+            )}
+
             <div className="text-center text-sm mb-4">
               <Link
                 href="/forget-password"
@@ -107,12 +117,6 @@ const LoginPage = () => {
                 Forgot Password?
               </Link>
             </div>
-
-            {error && (
-              <Typography variant="body2" color="error" mb={2}>
-                {error}
-              </Typography>
-            )}
 
             <CustomButton type="submit" fullWidth sx={{ mb: 4 }}>
               Login

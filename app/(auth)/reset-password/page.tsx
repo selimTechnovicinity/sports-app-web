@@ -7,6 +7,7 @@ import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
 import { setPasswordMutationFn } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
@@ -30,16 +31,22 @@ const ResetPasswordSchema = z
 const ResetPasswordPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   const { mutate: resetPassword, isPending } = useMutation({
     mutationFn: setPasswordMutationFn,
     onSuccess: (response) => {
       setError(null);
-      console.log(response.data);
+      showToast("Password reset successful", "success", "Success");
       router.push("/login");
     },
     onError: (error: any) => {
       setError(error?.response?.data?.message || "An error occurred");
+      showToast(
+        error?.response?.data?.message || "An error occurred",
+        "error",
+        "Error"
+      );
     },
   });
 

@@ -9,6 +9,7 @@ import {
   getTeamQueryFn,
   getUserProfileQueryFn,
 } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { cn } from "@/lib/utils";
 import AddIcon from "@mui/icons-material/Add";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -32,12 +33,12 @@ const DashboardPage = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const router = useRouter();
+  const { showToast } = useToast();
 
   const { data: userData, isLoading } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
       const response = await getUserProfileQueryFn();
-      console.log(response.data);
       return response.data;
     },
   });
@@ -94,6 +95,7 @@ const DashboardPage = () => {
     // Clear tokens or perform logout logic here
     Cookies.remove("accessToken");
     Cookies.remove("refreshToken");
+    showToast("Logout successful", "success", "Success");
     router.push("/login");
   };
 

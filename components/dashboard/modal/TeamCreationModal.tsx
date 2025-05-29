@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { createTeamMutationFn } from "@/lib/api";
 import API from "@/lib/axios-client";
+import { useToast } from "@/lib/Providers/ToastContext";
 
 import { Input } from "@mui/material";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -56,16 +57,18 @@ const TeamCreationModal = ({
   // const [input, setInput] = useState("");
 
   const queryClient = useQueryClient();
+  const { showToast } = useToast();
 
   const { mutate: createTeam, isPending } = useMutation({
     mutationFn: createTeamMutationFn,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
-      console.log("Team created successfully:", data);
+      showToast("Item created successfully!", "success", "Success");
       onClose();
     },
     onError: (error: any) => {
       console.error("Error creating team:", error);
+      showToast("Error creating team", "error", "Error");
     },
   });
 

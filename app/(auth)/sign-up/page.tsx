@@ -6,6 +6,7 @@ import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
 import { registerMutationFn } from "@/lib/api";
+import { useToast } from "@/lib/Providers/ToastContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
@@ -28,10 +29,12 @@ const CreateAccountPage = () => {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
+  const { showToast } = useToast();
+
   const { mutate: register, isPending } = useMutation({
     mutationFn: registerMutationFn,
     onSuccess: (response) => {
-      console.log(response);
+      showToast("Registration successful", "success", "Success");
       router.push("/login");
     },
     onError: (error: AxiosError<{ message?: string }>) => {
@@ -39,11 +42,11 @@ const CreateAccountPage = () => {
         error?.response?.data?.message ||
         "An error occurred during registration.";
       setError(errorMessage);
+      showToast(errorMessage, "error", "Registration Error");
     },
   });
 
   const handleRegister = (values: FieldValues) => {
-    console.log("Register values", values);
     register(values);
   };
 
