@@ -67,8 +67,7 @@ const TeamCreationModal = ({
       onClose();
     },
     onError: (error: any) => {
-      console.error("Error creating team:", error);
-      showToast("Error creating team", "error", "Error");
+      showToast((error as string) || "Error creating team", "error", "Error");
     },
   });
 

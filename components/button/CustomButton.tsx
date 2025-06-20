@@ -13,7 +13,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
   boxShadow: "0px 8px 16px rgba(0, 208, 132, 0.25)",
   "&:hover": {
     backgroundColor: "#00B374",
-    boxShadow: "0px 10px 20px rgba(0, 208, 132, 0.3)",
+    // boxShadow: "0px 10px 20px rgba(0, 208, 132, 0.3)",
   },
 }));
 

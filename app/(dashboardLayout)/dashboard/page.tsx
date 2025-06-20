@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import assets from "@/assets";
+import EventCreationModal from "@/components/dashboard/modal/EventCreationModal";
 import TeamCreationModal from "@/components/dashboard/modal/TeamCreationModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -11,7 +12,6 @@ import {
 } from "@/lib/api";
 import { useToast } from "@/lib/Providers/ToastContext";
 import { cn } from "@/lib/utils";
-import AddIcon from "@mui/icons-material/Add";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Avatar, Box, Button, IconButton, Menu, MenuItem } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
@@ -19,6 +19,7 @@ import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IoIosAddCircleOutline } from "react-icons/io";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 
 interface Team {
@@ -30,9 +31,12 @@ interface Team {
 const DashboardPage = () => {
   const [greenDot, setGreenDot] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [eventModalOpen, setEventModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+
   const router = useRouter();
+
   const { showToast } = useToast();
 
   const { data: userData, isLoading } = useQuery({
@@ -47,6 +51,7 @@ const DashboardPage = () => {
     queryKey: ["events"],
     queryFn: async () => {
       const response = await getEnventQueryFn();
+      console.log(response.data);
       return response.data;
     },
   });
@@ -153,22 +158,43 @@ const DashboardPage = () => {
         </div>
         {/* Header */}
         <div className="flex justify-between items-start mb-6 gap-4">
-          <Button
-            onClick={() => setModalOpen(true)}
-            variant="outlined"
-            startIcon={<AddIcon sx={{ color: "#00D17F" }} />}
-            sx={{
-              border: "none",
-              borderRadius: "20px",
-              textTransform: "none",
-              padding: 3,
-              backgroundColor: "white",
-              color: "black",
-              "&:hover": { backgroundColor: "#00D17F" },
-            }}
-          >
-            Create Team
-          </Button>
+          <div>
+            <Button
+              onClick={() => setModalOpen(true)}
+              variant="outlined"
+              startIcon={<IoIosAddCircleOutline size={25} />}
+              sx={{
+                border: "none",
+                borderRadius: "20px",
+                textTransform: "none",
+                padding: 3,
+                backgroundColor: "white",
+                color: "#00D17F",
+                "&:hover": { color: "white", backgroundColor: "#00D17F" },
+                marginRight: 2,
+                marginTop: 2,
+              }}
+            >
+              Create Team
+            </Button>
+            <Button
+              onClick={() => setEventModalOpen(true)}
+              variant="outlined"
+              startIcon={<IoIosAddCircleOutline size={25} />}
+              sx={{
+                border: "none",
+                borderRadius: "20px",
+                textTransform: "none",
+                padding: 3,
+                backgroundColor: "#00D17F",
+                color: "white",
+                "&:hover": { color: "#00D17F", backgroundColor: "white" },
+                marginTop: 2,
+              }}
+            >
+              Create Event
+            </Button>
+          </div>
 
           <div className="flex items-center sm:items-end gap-4">
             <Box position="relative" display="inline-flex">
@@ -202,7 +228,7 @@ const DashboardPage = () => {
               )}
             </Box>
 
-            {!isLoading && userData?.data && (
+            {!isLoading && userData?.data ? (
               <>
                 <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
                   <Avatar
@@ -261,6 +287,54 @@ const DashboardPage = () => {
                   </MenuItem>
                 </Menu>
               </>
+            ) : (
+              <>
+                <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
+                  <Avatar
+                    alt={``}
+                    src={"/default-avatar.jpg"}
+                    sx={{ width: 40, height: 40 }}
+                  />
+                </IconButton>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  PaperProps={{
+                    elevation: 0,
+                    sx: {
+                      overflow: "visible",
+                      filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                      mt: 1.5,
+                      "& .MuiAvatar-root": {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      "&:before": {
+                        content: '""',
+                        display: "block",
+                        position: "absolute",
+                        top: 0,
+                        right: 14,
+                        width: 10,
+                        height: 10,
+                        bgcolor: "background.paper",
+                        transform: "translateY(-50%) rotate(45deg)",
+                        zIndex: 0,
+                      },
+                    },
+                  }}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                >
+                  <MenuItem onClick={handleLogout} sx={{ color: "red" }}>
+                    <RiLogoutCircleRLine size={20} />
+                    <div className="ml-2">Logout</div>
+                  </MenuItem>
+                </Menu>
+              </>
             )}
           </div>
         </div>
@@ -268,6 +342,10 @@ const DashboardPage = () => {
         <TeamCreationModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
+        />
+        <EventCreationModal
+          open={eventModalOpen}
+          onClose={() => setEventModalOpen(false)}
         />
 
         {/* Live Matches */}
