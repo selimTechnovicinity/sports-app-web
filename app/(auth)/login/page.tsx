@@ -7,6 +7,7 @@ import CustomInput from "@/components/form/CustomInput";
 import BusketBall from "@/components/shared/BusketBall";
 import { loginMutationFn } from "@/lib/api";
 import { useToast } from "@/lib/Providers/ToastContext";
+import { minutesToDays } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Typography } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
@@ -33,8 +34,16 @@ const LoginPage = () => {
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginMutationFn,
     onSuccess: (response) => {
-      Cookies.set("accessToken", response?.data?.data.accessToken);
-      Cookies.set("refreshToken", response?.data?.data?.refreshToken);
+      Cookies.set("accessToken", response?.data?.data.accessToken, {
+        expires: minutesToDays(
+          Number(process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES)
+        ),
+      });
+      Cookies.set("refreshToken", response?.data?.data?.refreshToken, {
+        expires: minutesToDays(
+          Number(process.env.NEXT_PUBLIC_REFRESH_TOKEN_EXPIRES)
+        ),
+      });
       showToast("Login successful", "success", "Success");
       router.push("/dashboard");
     },
