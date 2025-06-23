@@ -30,10 +30,7 @@ const LoginPage = () => {
 
   const router = useRouter();
   const { showToast } = useToast();
-  console.log(
-    "Access Token Ecpires: ",
-    Number(process.env.NEXT_PUBLIC_ACCESS_TOKEN_EXPIRES)
-  );
+
 
   const { mutate: login, isPending } = useMutation({
     mutationFn: loginMutationFn,

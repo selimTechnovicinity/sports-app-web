@@ -54,7 +54,7 @@ API.interceptors.response.use(
 
     // Token not found or expired
     if (
-      (data as { errorCode?: string })?.errorCode === "AUTH_TOKEN_NOT_FOUND" &&
+      (data as { message?: string })?.message === "Token not found" &&
       status === 401 &&
       !originalRequest._retry
     ) {
@@ -78,10 +78,10 @@ API.interceptors.response.use(
 
       try {
         const res = await APIRefresh.get<{ accessToken: string }>(
-          "/auth/refresh"
+          "/auths/refresh-token"
         );
         const newAccessToken = res.data.accessToken;
-
+        console.log(res);
         // Optionally update cookies or headers
         API.defaults.headers.common[
           "Authorization"

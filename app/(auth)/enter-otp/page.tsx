@@ -49,7 +49,6 @@ const EnterOtpPage = () => {
     const email = localStorage.getItem("email");
 
     if (!email) throw new Error("Please go back to login page and try again.");
-    console.log("Entered OTP:", finalOtp);
     verifyOTP({ email: email, otp: finalOtp });
   };
 

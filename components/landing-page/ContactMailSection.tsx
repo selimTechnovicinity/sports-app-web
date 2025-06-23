@@ -7,11 +7,10 @@ import { FieldValues } from "react-hook-form";
 
 const ContactMailSection = () => {
   const [submittedMessage, setSubmittedMessage] = useState<string | null>(null);
-  console.log(submittedMessage);
   const handleSend = (values: FieldValues) => {
     const message = values?.message?.trim();
     if (message) {
-      console.log("Message sent:", message);
+
       setSubmittedMessage(message);
     }
   };

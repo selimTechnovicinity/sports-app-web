@@ -51,7 +51,6 @@ const DashboardPage = () => {
     queryKey: ["events"],
     queryFn: async () => {
       const response = await getEnventQueryFn();
-      console.log(response.data);
       return response.data;
     },
   });
