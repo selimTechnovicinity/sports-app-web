@@ -28,15 +28,35 @@ interface Team {
   image: string;
 }
 
+interface Event {
+  _id: string;
+  team_id?: {
+    _id: string;
+    team_name: string;
+    image: string;
+  };
+  opponent_team_id?: {
+    _id: string;
+    team_name: string;
+    image: string;
+  };
+  start_date: string;
+  duration: number;
+  event_type: string;
+  location: string;
+}
+
 const DashboardPage = () => {
   const [greenDot, setGreenDot] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
+  const [currentUpcomingPage, setCurrentUpcomingPage] = useState(1);
+  const [upcomingItemsPerPage] = useState(5);
 
   const router = useRouter();
-
   const { showToast } = useToast();
 
   const { data: userData, isLoading } = useQuery({
@@ -46,6 +66,7 @@ const DashboardPage = () => {
       return response.data;
     },
   });
+  console.log(userData?.data?.user);
 
   const { data: eventsData } = useQuery({
     queryKey: ["events"],
@@ -59,7 +80,6 @@ const DashboardPage = () => {
     queryKey: ["teams"],
     queryFn: async () => {
       const response = await getTeamQueryFn();
-
       return response.data;
     },
   });
@@ -71,6 +91,7 @@ const DashboardPage = () => {
 
     return () => clearInterval(timer);
   }, []);
+
   // Categorize events into live and upcoming
   const { liveEvents, upcomingEvents } = eventsData?.data?.reduce(
     (acc: any, event: any) => {
@@ -87,6 +108,21 @@ const DashboardPage = () => {
     { liveEvents: [], upcomingEvents: [] }
   ) || { liveEvents: [], upcomingEvents: [] };
 
+  // Pagination logic for upcoming events
+  const indexOfLastUpcoming = currentUpcomingPage * upcomingItemsPerPage;
+  const indexOfFirstUpcoming = indexOfLastUpcoming - upcomingItemsPerPage;
+  const currentUpcomingEvents = upcomingEvents.slice(
+    indexOfFirstUpcoming,
+    indexOfLastUpcoming
+  );
+  const totalUpcomingPages = Math.ceil(
+    upcomingEvents.length / upcomingItemsPerPage
+  );
+
+  const handleUpcomingPageChange = (pageNumber: number) => {
+    setCurrentUpcomingPage(pageNumber);
+  };
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -96,12 +132,56 @@ const DashboardPage = () => {
   };
 
   const handleLogout = () => {
-    // Clear tokens or perform logout logic here
     Cookies.remove("accessToken");
     Cookies.remove("refreshToken");
     showToast("Logout successful", "success", "Success");
     router.push("/login");
   };
+
+  const MatchEventCard = ({ event }: { event: Event }) => (
+    <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow">
+      <div className="flex items-center gap-3 w-full sm:w-auto">
+        <img
+          src={event.team_id?.image || "/default-team.png"}
+          alt={event.team_id?.team_name || "Your Team"}
+          className="w-10 h-10 rounded-full"
+        />
+        <p className="text-sm font-medium">
+          {event.team_id?.team_name || "Your Team"}
+        </p>
+      </div>
+
+      <div className="text-center my-2 sm:my-0">
+        <p className="text-xs text-gray-500">
+          {new Date(event.start_date).toLocaleDateString([], {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+        </p>
+        <p className="text-xs text-gray-500">
+          {new Date(event.start_date).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </p>
+        <div className="mt-1 px-3 py-1 bg-gray-100 rounded-full text-xs font-medium">
+          {event.location || "TBD"}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 w-full sm:w-auto justify-end sm:justify-start">
+        <p className="text-sm font-medium">
+          {event.opponent_team_id?.team_name || "Opponent"}
+        </p>
+        <img
+          src={event.opponent_team_id?.image || "/default-team.png"}
+          alt={event.opponent_team_id?.team_name || "Opponent"}
+          className="w-10 h-10 rounded-full"
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col-reverse lg:flex-row overflow-y-auto">
@@ -142,7 +222,7 @@ const DashboardPage = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-gray-200 p-4 sm:p-6 ">
+      <main className="flex-1 bg-gray-200 p-4 sm:p-6">
         <div className="lg:hidden flex bg-white mb-4 rounded-lg p-2 justify-between items-center">
           <Image
             src={assets.images.logo}
@@ -155,6 +235,7 @@ const DashboardPage = () => {
             ALLSTARS BASKETBALL
           </div>
         </div>
+
         {/* Header */}
         <div className="flex justify-between items-start mb-6 gap-4">
           <div>
@@ -231,8 +312,8 @@ const DashboardPage = () => {
               <>
                 <IconButton onClick={handleMenuOpen} sx={{ p: 0 }}>
                   <Avatar
-                    alt={`${userData.data.first_name} ${userData.data.last_name}`}
-                    src={userData.data.image || "/default-avatar.jpg"}
+                    alt={`${userData.data.first_name} ${userData?.data?.user?.last_name}`}
+                    src={userData?.data?.user?.image || "/default-avatar.jpg"}
                     sx={{ width: 40, height: 40 }}
                   />
                 </IconButton>
@@ -271,12 +352,12 @@ const DashboardPage = () => {
                 >
                   <MenuItem onClick={handleMenuClose}>
                     <div className="flex flex-col p-2">
-                      <span className="font-semibold">{`${userData.data.first_name} ${userData.data.last_name}`}</span>
+                      <span className="font-semibold">{`${userData?.data?.user?.first_name} ${userData?.data?.user?.last_name}`}</span>
                       <span className="text-sm text-gray-500">
-                        {userData.data.email}
+                        {userData?.data?.user?.email}
                       </span>
                       <span className="text-xs text-gray-400 capitalize">
-                        {userData.data.role.toLowerCase()}
+                        {userData?.data?.user?.role.toLowerCase()}
                       </span>
                     </div>
                   </MenuItem>
@@ -419,48 +500,97 @@ const DashboardPage = () => {
         {upcomingEvents.length > 0 && (
           <section className="mb-12">
             <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2 sm:gap-0">
-              <h2 className="text-lg font-semibold">Upcoming Match</h2>
-              <button className="text-green-500 text-sm text-end">
-                See All
+              <h2 className="text-lg font-semibold">
+                {showAllUpcoming ? "All Upcoming Matches" : "Upcoming Match"}
+              </h2>
+              <button
+                className="text-green-500 text-sm text-end"
+                onClick={() => {
+                  setShowAllUpcoming(!showAllUpcoming);
+                  setCurrentUpcomingPage(1);
+                }}
+              >
+                {showAllUpcoming ? "Show Less" : "See All"}
               </button>
             </div>
-            <div className="space-y-4">
-              {upcomingEvents.map((event: any) => (
-                <div
-                  key={event._id}
-                  className="bg-white p-4 rounded-xl shadow-sm flex justify-between items-center sm:items-center gap-2"
-                >
-                  <p className="text-sm font-medium text-center">
-                    <img
-                      src={event.team_id?.image || "/default-team.png"}
-                      alt={event.team_id?.team_name || "Your Team"}
-                      className="w-10 h-10 rounded-full mx-auto mb-2"
-                    />
-                    {event.team_id?.team_name || "Your Team"}
-                  </p>
-                  <p className="text-xs text-gray-500 text-center">
-                    {new Date(event.start_date).toLocaleDateString([], {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}{" "}
-                    -{" "}
-                    {new Date(event.start_date).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </p>
-                  <p className="text-sm font-medium text-center">
-                    <img
-                      src={event.opponent_team_id?.image || "/default-team.png"}
-                      alt={event.opponent_team_id?.team_name || "Your Team"}
-                      className="w-10 h-10 rounded-full mx-auto mb-2"
-                    />
-                    {event.opponent_team_id?.team_name || "Opponent"}
-                  </p>
+
+            {!showAllUpcoming ? (
+              <div className="space-y-4">
+                {upcomingEvents.slice(0, 3).map((event: Event) => (
+                  <MatchEventCard key={event._id} event={event} />
+                ))}
+              </div>
+            ) : (
+              <div>
+                <div className="space-y-4 mb-6">
+                  {currentUpcomingEvents.map((event: Event) => (
+                    <MatchEventCard key={event._id} event={event} />
+                  ))}
                 </div>
-              ))}
-            </div>
+
+                {totalUpcomingPages > 1 && (
+                  <div className="flex justify-center mt-6">
+                    <nav
+                      className="flex items-center gap-2"
+                      aria-label="Pagination"
+                    >
+                      <button
+                        onClick={() =>
+                          handleUpcomingPageChange(currentUpcomingPage - 1)
+                        }
+                        disabled={currentUpcomingPage === 1}
+                        className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+
+                      {Array.from(
+                        { length: Math.min(5, totalUpcomingPages) },
+                        (_, i) => {
+                          let pageNum;
+                          if (totalUpcomingPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentUpcomingPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (
+                            currentUpcomingPage >=
+                            totalUpcomingPages - 2
+                          ) {
+                            pageNum = totalUpcomingPages - 4 + i;
+                          } else {
+                            pageNum = currentUpcomingPage - 2 + i;
+                          }
+
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => handleUpcomingPageChange(pageNum)}
+                              className={`px-4 py-2 rounded-md border ${
+                                currentUpcomingPage === pageNum
+                                  ? "bg-green-500 text-white border-green-500"
+                                  : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        }
+                      )}
+
+                      <button
+                        onClick={() =>
+                          handleUpcomingPageChange(currentUpcomingPage + 1)
+                        }
+                        disabled={currentUpcomingPage === totalUpcomingPages}
+                        className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next
+                      </button>
+                    </nav>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         )}
       </main>

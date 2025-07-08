@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import CustomInput from "@/components/form/CustomInput";
 import CustomButton from "@/components/button/CustomButton";
