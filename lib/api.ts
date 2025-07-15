@@ -24,6 +24,8 @@ export const getEnventQueryFn = async () => await API.get(`/events`);
 
 export const getTeamQueryFn = async () => await API.get(`/teams`);
 
+export const getUserTeamQueryFn = async () => await API.get(`/teams/own-teams`);
+
 export const createTeamMutationFn = async (data: FieldValues) =>
   await API.post(`/teams`, data, {
     headers: {

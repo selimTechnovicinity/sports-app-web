@@ -2,49 +2,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import assets from "@/assets";
+import CoachAdditionModal from "@/components/dashboard/modal/CoachAdditionModal";
 import EventCreationModal from "@/components/dashboard/modal/EventCreationModal";
+import PlayerAdditionModal from "@/components/dashboard/modal/PlayerAdditionModal";
 import TeamCreationModal from "@/components/dashboard/modal/TeamCreationModal";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  getEnventQueryFn,
-  getTeamQueryFn,
-  getUserProfileQueryFn,
-} from "@/lib/api";
+import { useGetEvents } from "@/lib/hook/useGetEvents";
+import { useGetProfile } from "@/lib/hook/useGetProfile";
+import { useGetTeams } from "@/lib/hook/useGetTeams";
+import { useGetUserTeams } from "@/lib/hook/useGetUserTeam";
 import { useToast } from "@/lib/Providers/ToastContext";
 import { cn } from "@/lib/utils";
+import { Event, Team } from "@/types/dashboard";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { Avatar, Box, Button, IconButton, Menu, MenuItem } from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { RiLogoutCircleRLine } from "react-icons/ri";
-
-interface Team {
-  _id: string;
-  team_name: string;
-  image: string;
-}
-
-interface Event {
-  _id: string;
-  team_id?: {
-    _id: string;
-    team_name: string;
-    image: string;
-  };
-  opponent_team_id?: {
-    _id: string;
-    team_name: string;
-    image: string;
-  };
-  start_date: string;
-  duration: number;
-  event_type: string;
-  location: string;
-}
 
 const DashboardPage = () => {
   const [greenDot, setGreenDot] = useState(true);
@@ -55,34 +32,19 @@ const DashboardPage = () => {
   const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [currentUpcomingPage, setCurrentUpcomingPage] = useState(1);
   const [upcomingItemsPerPage] = useState(5);
+  const [addPlayerModal, setAddPlayerModal] = useState(false);
+  const [addCoachModal, setAddCoachModal] = useState(false);
 
   const router = useRouter();
   const { showToast } = useToast();
 
-  const { data: userData, isLoading } = useQuery({
-    queryKey: ["userProfile"],
-    queryFn: async () => {
-      const response = await getUserProfileQueryFn();
-      return response.data;
-    },
-  });
-  console.log(userData?.data?.user);
+  const { userData, isLoading } = useGetProfile();
 
-  const { data: eventsData } = useQuery({
-    queryKey: ["events"],
-    queryFn: async () => {
-      const response = await getEnventQueryFn();
-      return response.data;
-    },
-  });
+  const { events } = useGetEvents();
 
-  const { data: teamsData } = useQuery({
-    queryKey: ["teams"],
-    queryFn: async () => {
-      const response = await getTeamQueryFn();
-      return response.data;
-    },
-  });
+  const { teams } = useGetTeams();
+
+  const { userTeams } = useGetUserTeams();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -93,7 +55,7 @@ const DashboardPage = () => {
   }, []);
 
   // Categorize events into live and upcoming
-  const { liveEvents, upcomingEvents } = eventsData?.data?.reduce(
+  const { liveEvents, upcomingEvents } = events?.data?.reduce(
     (acc: any, event: any) => {
       const startTime = new Date(event.start_date);
       const endTime = new Date(startTime.getTime() + event.duration * 60000);
@@ -141,9 +103,11 @@ const DashboardPage = () => {
   const MatchEventCard = ({ event }: { event: Event }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm flex flex-col sm:flex-row justify-between items-center gap-4 hover:shadow-md transition-shadow">
       <div className="flex items-center gap-3 w-full sm:w-auto">
-        <img
-          src={event.team_id?.image || "/default-team.png"}
-          alt={event.team_id?.team_name || "Your Team"}
+        <Image
+          src={event.team_id?.image || "/default_image.jpg"}
+          width={50}
+          height={50}
+          alt=""
           className="w-10 h-10 rounded-full"
         />
         <p className="text-sm font-medium">
@@ -174,9 +138,11 @@ const DashboardPage = () => {
         <p className="text-sm font-medium">
           {event.opponent_team_id?.team_name || "Opponent"}
         </p>
-        <img
-          src={event.opponent_team_id?.image || "/default-team.png"}
-          alt={event.opponent_team_id?.team_name || "Opponent"}
+        <Image
+          src={event.opponent_team_id?.image || "/default_image.jpg"}
+          alt=""
+          width={50}
+          height={50}
           className="w-10 h-10 rounded-full"
         />
       </div>
@@ -204,13 +170,37 @@ const DashboardPage = () => {
         </div>
         <ScrollArea className="flex-1 p-4 bg-gray-200 mb-4 rounded-b-4xl">
           <ul className="space-y-3 mb-4">
-            {teamsData?.data?.map((team: Team, i: number) => (
+            {teams?.data?.map((team: Team, i: number) => (
               <li
                 key={i}
                 className="text-sm hover:text-green-500 cursor-pointer flex items-center gap-2"
               >
-                <img
-                  src={team.image}
+                <Image
+                  src={team.image || "/default_image.jpg"}
+                  width={50}
+                  height={50}
+                  alt={""}
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+                {team.team_name}
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
+        <div className="bg-[#00D17F] text-white px-6 py-4 font-medium rounded-t-4xl text-center lg:text-left">
+          MY TEAMS
+        </div>
+        <ScrollArea className="flex-1 p-4 bg-gray-200 mb-4 rounded-b-4xl">
+          <ul className="space-y-3 mb-4">
+            {userTeams?.data?.map((team: Team, i: number) => (
+              <li
+                key={i}
+                className="text-sm hover:text-green-500 cursor-pointer flex items-center gap-2"
+              >
+                <Image
+                  src={team.image || "/default_image.jpg"}
+                  width={50}
+                  height={50}
                   alt={""}
                   className="w-6 h-6 rounded-full object-cover"
                 />
@@ -270,9 +260,46 @@ const DashboardPage = () => {
                 color: "white",
                 "&:hover": { color: "#00D17F", backgroundColor: "white" },
                 marginTop: 2,
+                marginRight: 2,
               }}
             >
               Create Event
+            </Button>
+            <Button
+              onClick={() => setAddPlayerModal(true)}
+              variant="outlined"
+              startIcon={<IoIosAddCircleOutline size={25} />}
+              sx={{
+                border: "none",
+                borderRadius: "20px",
+                textTransform: "none",
+                padding: 3,
+                backgroundColor: "white",
+                color: "#00D17F",
+                "&:hover": { color: "white", backgroundColor: "#00D17F" },
+                marginRight: 2,
+                marginTop: 2,
+              }}
+            >
+              Add Player
+            </Button>
+            <Button
+              onClick={() => setAddCoachModal(true)}
+              variant="outlined"
+              startIcon={<IoIosAddCircleOutline size={25} />}
+              sx={{
+                border: "none",
+                borderRadius: "20px",
+                textTransform: "none",
+                padding: 3,
+                backgroundColor: "#00D17F",
+                color: "white",
+                "&:hover": { color: "#00D17F", backgroundColor: "white" },
+                marginTop: 2,
+                marginRight: 2,
+              }}
+            >
+              Add Coach
             </Button>
           </div>
 
@@ -428,6 +455,16 @@ const DashboardPage = () => {
           onClose={() => setEventModalOpen(false)}
         />
 
+        <PlayerAdditionModal
+          open={addPlayerModal}
+          onClose={() => setAddPlayerModal(false)}
+        />
+
+        <CoachAdditionModal
+          open={addCoachModal}
+          onClose={() => setAddCoachModal(false)}
+        />
+
         {/* Live Matches */}
         {liveEvents.length > 0 && (
           <section className="mb-8">
@@ -459,9 +496,11 @@ const DashboardPage = () => {
                   </div>
                   <div className="flex justify-between items-center mt-4">
                     <div className="text-center">
-                      <img
-                        src={event.team_id?.image || "/default-team.png"}
+                      <Image
+                        src={event.team_id?.image || "/default_image.jpg"}
                         alt={" "}
+                        width={500}
+                        height={500}
                         className="w-10 h-10 rounded-full mx-auto mb-2"
                       />
                       <p className="text-xs mt-2">
@@ -478,11 +517,13 @@ const DashboardPage = () => {
                       <p className="text-xl font-bold">VS</p>
                     </div>
                     <div className="text-center">
-                      <img
+                      <Image
                         src={
-                          event.opponent_team_id?.image || "/default-team.png"
+                          event.opponent_team_id?.image || "/default_image.jpg"
                         }
-                        alt={event.opponent_team_id?.team_name || "Your Team"}
+                        alt=""
+                        width={50}
+                        height={50}
                         className="w-10 h-10 rounded-full mx-auto mb-2"
                       />
                       <p className="text-xs mt-2">

@@ -57,12 +57,12 @@ const EventCreationModal = ({
 
   const fetchTeams = async () => {
     try {
-      const res = await API.get("/teams");
+      const res = await API.get("/teams?limit=10000");
       setTeams(
         res.data.data.map((team: any) => ({
           value: team._id,
           label: team.team_name,
-          image: team.image,
+          image: team.image || "/default_image.jpg",
         }))
       );
     } catch (error) {
@@ -77,7 +77,7 @@ const EventCreationModal = ({
     >
       {data.image && (
         <Image
-          src={data.image}
+          src={data.image || "/default_image.jpg"}
           alt={label}
           width={24}
           height={24}

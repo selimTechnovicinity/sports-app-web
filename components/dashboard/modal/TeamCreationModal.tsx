@@ -63,11 +63,12 @@ const TeamCreationModal = ({
     mutationFn: createTeamMutationFn,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["teams"] });
+      queryClient.invalidateQueries({ queryKey: ["UserTeams"] });
       showToast("Item created successfully!", "success", "Success");
       onClose();
     },
     onError: (error: any) => {
-      showToast((error as string) || "Error creating team", "error", "Error");
+      showToast("Error creating team", "error", "Error");
     },
   });
 
@@ -79,7 +80,7 @@ const TeamCreationModal = ({
       return response.data.data.map((item: any) => ({
         value: item._id,
         label: item.title,
-        image: item.image,
+        image: item.image || "/default_image.jpg",
       }));
     },
   });
@@ -249,9 +250,9 @@ const TeamCreationModal = ({
                 >
                   {step.type === "icon" && option.image && (
                     <img
-                      src={option.image}
+                      src={option.image || "/default_image.jpg"}
                       alt={option.label}
-                      className="w-8 h-8 object-contain mb-2"
+                      className="w-20 object-contain mb-2"
                     />
                   )}
                   <p className="text-sm font-medium text-center">
